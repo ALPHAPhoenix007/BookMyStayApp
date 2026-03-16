@@ -12,6 +12,8 @@ public class HotelBookingApp{
         Room doubleRoom = new DoubleRoom();
         Room suiteRoom = new SuiteRoom();
 
+        RoomInventory inventory = new RoomInventory();
+
         // Static availability variables
         int singleAvailability = 5;
         int doubleAvailability = 3;
@@ -28,5 +30,7 @@ public class HotelBookingApp{
         System.out.println("\nSuite Room:");
         suiteRoom.displayRoomDetails();
         System.out.println("Available: " + suiteAvailability);
+
+        inventory.displayInventory();
     }
 }
