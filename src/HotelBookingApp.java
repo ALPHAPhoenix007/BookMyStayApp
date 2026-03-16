@@ -18,7 +18,19 @@ public class HotelBookingApp{
         String[] roomTypes = {"Single", "Double", "Suite"};
 
         SearchService searchService = new SearchService(inventory);
-
         searchService.displayAvailableRooms(rooms, roomTypes);
+
+        // UC5 – Booking request queue
+        BookingRequestQueue bookingQueue = new BookingRequestQueue();
+
+        Reservation r1 = new Reservation("Alice", "Single");
+        Reservation r2 = new Reservation("Bob", "Double");
+        Reservation r3 = new Reservation("Charlie", "Suite");
+
+        bookingQueue.addRequest(r1);
+        bookingQueue.addRequest(r2);
+        bookingQueue.addRequest(r3);
+
+        bookingQueue.displayRequests();
     }
 }
