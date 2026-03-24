@@ -43,5 +43,31 @@ public class HotelBookingApp{
         // Show remaining inventory
         System.out.println("\nRemaining Inventory:");
         inventory.displayInventory();
+
+        // ================= UC7: Add-On Services =================
+
+        AddOnServiceManager serviceManager = new AddOnServiceManager();
+
+// Create services
+        AddOnService wifi = new AddOnService("WiFi", 10);
+        AddOnService breakfast = new AddOnService("Breakfast", 20);
+        AddOnService spa = new AddOnService("Spa", 50);
+
+// Attach services to reservation (using guest name as ID)
+        serviceManager.addService("Alice", wifi);
+        serviceManager.addService("Alice", breakfast);
+
+        serviceManager.addService("Bob", spa);
+
+// Display services
+        serviceManager.displayServices("Alice");
+        serviceManager.displayServices("Bob");
+
+// Total cost
+        System.out.println("\nTotal Add-On Cost for Alice: $" +
+                serviceManager.calculateTotalCost("Alice"));
+
+        System.out.println("Total Add-On Cost for Bob: $" +
+                serviceManager.calculateTotalCost("Bob"));
     }
 }
