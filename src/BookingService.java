@@ -6,6 +6,7 @@ import java.util.Set;
 /**
  * Processes booking requests and allocates rooms.
  * Ensures no double booking occurs.
+ * Supports validation, history tracking, cancellation, and concurrency.
  */
 public class BookingService {
 
@@ -15,10 +16,10 @@ public class BookingService {
     // UC8: Booking history
     private BookingHistory history;
 
-    // UC10: Track guest → room mapping
+    // UC10: Guest → Room mapping
     private HashMap<String, String> reservationToRoom;
 
-    // ✅ UPDATED CONSTRUCTOR
+    // ✅ CONSTRUCTOR
     public BookingService(RoomInventory inventory, BookingHistory history) {
         this.inventory = inventory;
         this.history = history;
@@ -27,7 +28,7 @@ public class BookingService {
     }
 
     /**
-     * Processes queued booking requests (FIFO)
+     * UC1–UC9: Normal FIFO processing
      */
     public void processRequests(Queue<Reservation> requestQueue) {
 
@@ -36,7 +37,7 @@ public class BookingService {
             Reservation request = requestQueue.poll();
 
             try {
-                // ✅ UC9: Validation
+                // UC9: Validation
                 BookingValidator.validate(request, inventory);
 
                 String roomType = request.getRoomType();
@@ -44,25 +45,22 @@ public class BookingService {
 
                 if (available > 0) {
 
-                    // Generate room ID
                     String roomID = generateRoomID(roomType);
 
-                    // Allocate room
                     allocatedRooms
                             .computeIfAbsent(roomType, k -> new HashSet<>())
                             .add(roomID);
 
-                    // Update inventory
                     inventory.updateAvailability(roomType, available - 1);
 
                     System.out.println("Reservation Confirmed: "
                             + request.getGuestName()
                             + " -> " + roomType + " [" + roomID + "]");
 
-                    // ✅ UC8: Add to history
+                    // UC8: History
                     history.addBooking(request);
 
-                    // ✅ UC10: Store mapping for cancellation
+                    // UC10: Mapping for cancellation
                     reservationToRoom.put(request.getGuestName(), roomID);
 
                 } else {
@@ -72,20 +70,75 @@ public class BookingService {
                 }
 
             } catch (InvalidBookingException e) {
-
-                // ✅ Graceful failure
                 System.out.println("Invalid Booking: " + e.getMessage());
-
             } catch (Exception e) {
-
-                // Safety fallback
                 System.out.println("Unexpected error: " + e.getMessage());
             }
         }
     }
 
     /**
-     * Generates a unique room ID using room type and counter
+     * UC11: Concurrent processing (Thread-safe)
+     */
+    public void processRequestsConcurrently(BookingRequestQueue bookingQueue) {
+
+        while (true) {
+
+            Reservation request;
+
+            // 🔒 Critical section: Queue access
+            synchronized (bookingQueue) {
+                request = bookingQueue.getNextRequest();
+            }
+
+            if (request == null) {
+                break;
+            }
+
+            try {
+                // Validation
+                BookingValidator.validate(request, inventory);
+
+                String roomType = request.getRoomType();
+
+                // 🔒 Critical section: Inventory + Allocation
+                synchronized (inventory) {
+
+                    int available = inventory.getAvailability(roomType);
+
+                    if (available > 0) {
+
+                        String roomID = generateRoomID(roomType);
+
+                        allocatedRooms
+                                .computeIfAbsent(roomType, k -> new HashSet<>())
+                                .add(roomID);
+
+                        inventory.updateAvailability(roomType, available - 1);
+
+                        System.out.println(Thread.currentThread().getName()
+                                + " → Confirmed: "
+                                + request.getGuestName()
+                                + " [" + roomID + "]");
+
+                        history.addBooking(request);
+                        reservationToRoom.put(request.getGuestName(), roomID);
+
+                    } else {
+                        System.out.println(Thread.currentThread().getName()
+                                + " → Failed: "
+                                + request.getGuestName());
+                    }
+                }
+
+            } catch (InvalidBookingException e) {
+                System.out.println("Invalid Booking: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Generate unique room ID
      */
     private String generateRoomID(String roomType) {
         Set<String> assigned = allocatedRooms.getOrDefault(roomType, new HashSet<>());
@@ -94,7 +147,7 @@ public class BookingService {
     }
 
     /**
-     * Displays all allocated rooms
+     * Display allocated rooms
      */
     public void displayAllocatedRooms() {
         System.out.println("\nAllocated Rooms:");
@@ -103,14 +156,12 @@ public class BookingService {
         }
     }
 
-    // ================= UC10 METHODS =================
+    // ================= UC10: Cancellation Support =================
 
-    // Get allocated room for a guest
     public String getAllocatedRoom(String guestName) {
         return reservationToRoom.get(guestName);
     }
 
-    // Remove reservation after cancellation
     public void removeReservation(String guestName) {
         reservationToRoom.remove(guestName);
     }

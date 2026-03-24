@@ -9,21 +9,22 @@ public class BookingRequestQueue {
         requestQueue = new LinkedList<>();
     }
 
-    public void addRequest(Reservation reservation) {
+    // ✅ Thread-safe add (UC11)
+    public synchronized void addRequest(Reservation reservation) {
         requestQueue.offer(reservation);
         System.out.println("Booking request added for " + reservation.getGuestName());
     }
 
+    // ✅ Thread-safe retrieval (UC11)
+    public synchronized Reservation getNextRequest() {
+        return requestQueue.poll();
+    }
+
+    // Optional: display (read-only)
     public void displayRequests() {
         System.out.println("\nCurrent Booking Requests:");
         for (Reservation r : requestQueue) {
             r.displayReservation();
         }
-    }
-
-    // <<< THIS IS THE FIX >>>
-    // Add this public getter so BookingService can access the queue
-    public Queue<Reservation> getQueue() {
-        return requestQueue;
     }
 }
