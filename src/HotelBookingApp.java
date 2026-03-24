@@ -34,7 +34,8 @@ public class HotelBookingApp{
         bookingQueue.addRequest(new Reservation("Eve", "Suite")); // may fail if only 2 suites
 
         // Booking service
-        BookingService bookingService = new BookingService(inventory);
+        BookingHistory history = new BookingHistory();
+        BookingService bookingService = new BookingService(inventory, history);
         bookingService.processRequests(bookingQueue.getQueue()); // FIFO processing
 
         // Show allocated rooms

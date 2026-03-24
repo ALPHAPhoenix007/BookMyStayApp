@@ -12,8 +12,13 @@ public class BookingService {
     private RoomInventory inventory;
     private HashMap<String, Set<String>> allocatedRooms;
 
-    public BookingService(RoomInventory inventory) {
+    // ✅ UC8: Booking History added
+    private BookingHistory history;
+
+    // ✅ UPDATED CONSTRUCTOR
+    public BookingService(RoomInventory inventory, BookingHistory history) {
         this.inventory = inventory;
+        this.history = history;
         this.allocatedRooms = new HashMap<>();
     }
 
@@ -32,15 +37,23 @@ public class BookingService {
                 String roomID = generateRoomID(roomType);
 
                 // Allocate room
-                allocatedRooms.computeIfAbsent(roomType, k -> new HashSet<>()).add(roomID);
+                allocatedRooms
+                        .computeIfAbsent(roomType, k -> new HashSet<>())
+                        .add(roomID);
 
                 // Update inventory
                 inventory.updateAvailability(roomType, available - 1);
 
-                System.out.println("Reservation Confirmed: " + request.getGuestName()
+                System.out.println("Reservation Confirmed: "
+                        + request.getGuestName()
                         + " -> " + roomType + " [" + roomID + "]");
+
+                // ✅ UC8: STORE IN HISTORY
+                history.addBooking(request);
+
             } else {
-                System.out.println("Reservation Failed: " + request.getGuestName()
+                System.out.println("Reservation Failed: "
+                        + request.getGuestName()
                         + " -> " + roomType + " (No rooms available)");
             }
         }
