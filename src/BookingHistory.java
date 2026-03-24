@@ -1,7 +1,10 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookingHistory {
+public class BookingHistory implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private List<Reservation> confirmedBookings;
 
@@ -9,25 +12,16 @@ public class BookingHistory {
         confirmedBookings = new ArrayList<>();
     }
 
-    // Add confirmed booking
     public void addBooking(Reservation reservation) {
         confirmedBookings.add(reservation);
     }
 
-    // Get all bookings
     public List<Reservation> getBookings() {
         return confirmedBookings;
     }
 
-    // Display history
     public void displayHistory() {
         System.out.println("\nBooking History:");
-
-        if (confirmedBookings.isEmpty()) {
-            System.out.println("No bookings found.");
-            return;
-        }
-
         for (Reservation r : confirmedBookings) {
             r.displayReservation();
         }

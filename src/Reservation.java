@@ -1,7 +1,8 @@
-/**
- * Represents a guest booking request.
- */
-public class Reservation {
+import java.io.Serializable;
+
+public class Reservation implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String guestName;
     private String roomType;
