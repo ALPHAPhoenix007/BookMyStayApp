@@ -88,5 +88,42 @@ public class HotelBookingApp{
 // Show updated inventory
         System.out.println("\nInventory After Cancellation:");
         inventory.displayInventory();
+
+        // ================= UC11: Concurrent Booking =================
+
+        System.out.println("\n=== Concurrent Booking Simulation ===");
+
+// New queue for concurrency test
+        BookingRequestQueue concurrentQueue = new BookingRequestQueue();
+
+// Add multiple requests
+        concurrentQueue.addRequest(new Reservation("User1", "Single"));
+        concurrentQueue.addRequest(new Reservation("User2", "Single"));
+        concurrentQueue.addRequest(new Reservation("User3", "Single"));
+        concurrentQueue.addRequest(new Reservation("User4", "Single"));
+        concurrentQueue.addRequest(new Reservation("User5", "Single"));
+
+// Create threads
+        Thread t1 = new Thread(() -> bookingService.processRequestsConcurrently(concurrentQueue), "Thread-1");
+        Thread t2 = new Thread(() -> bookingService.processRequestsConcurrently(concurrentQueue), "Thread-2");
+        Thread t3 = new Thread(() -> bookingService.processRequestsConcurrently(concurrentQueue), "Thread-3");
+
+// Start threads
+        t1.start();
+        t2.start();
+        t3.start();
+
+// Wait for completion
+        try {
+            t1.join();
+            t2.join();
+            t3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+// Final inventory check
+        System.out.println("\nInventory After Concurrent Booking:");
+        inventory.displayInventory();
     }
 }
