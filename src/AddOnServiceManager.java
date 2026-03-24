@@ -2,14 +2,12 @@ import java.util.*;
 
 public class AddOnServiceManager {
 
-    // reservationId (guestName) → list of services
     private Map<String, List<AddOnService>> serviceMap;
 
     public AddOnServiceManager() {
         serviceMap = new HashMap<>();
     }
-
-    // Add service to reservation
+    
     public void addService(String reservationId, AddOnService service) {
 
         serviceMap
@@ -19,8 +17,6 @@ public class AddOnServiceManager {
         System.out.println(service.getServiceName() +
                 " added for reservation: " + reservationId);
     }
-
-    // Display services
     public void displayServices(String reservationId) {
 
         List<AddOnService> services = serviceMap.get(reservationId);
@@ -37,7 +33,6 @@ public class AddOnServiceManager {
         }
     }
 
-    // Calculate total cost
     public double calculateTotalCost(String reservationId) {
 
         List<AddOnService> services = serviceMap.get(reservationId);
