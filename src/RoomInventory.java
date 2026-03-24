@@ -1,17 +1,10 @@
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Manages the availability of rooms in the hotel.
- * Acts as the centralized inventory system.
- */
 public class RoomInventory {
 
     private Map<String, Integer> availability;
 
-    /**
-     * Constructor initializes room availability.
-     */
     public RoomInventory() {
         availability = new HashMap<>();
 
@@ -20,23 +13,21 @@ public class RoomInventory {
         availability.put("Suite", 2);
     }
 
-    /**
-     * Returns the availability of a specific room type.
-     */
+
     public int getAvailability(String roomType) {
         return availability.getOrDefault(roomType, 0);
     }
 
-    /**
-     * Updates availability after booking or cancellation.
-     */
     public void updateAvailability(String roomType, int count) {
+
+        if (count < 0) {
+            throw new IllegalArgumentException(
+                    "Inventory cannot be negative for " + roomType);
+        }
+
         availability.put(roomType, count);
     }
 
-    /**
-     * Displays current inventory.
-     */
     public void displayInventory() {
         System.out.println("\nCurrent Room Inventory:");
 

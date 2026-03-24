@@ -32,9 +32,13 @@ public class HotelBookingApp{
         bookingQueue.addRequest(new Reservation("Charlie", "Suite"));
         bookingQueue.addRequest(new Reservation("David", "Single")); // extra to test FIFO
         bookingQueue.addRequest(new Reservation("Eve", "Suite")); // may fail if only 2 suites
+        // ================= UC9: Invalid Test Cases =================
+        bookingQueue.addRequest(new Reservation("", "Single"));       // Invalid name
+        bookingQueue.addRequest(new Reservation("John", "Deluxe"));   // Invalid room type
 
         // Booking service
-        BookingService bookingService = new BookingService(inventory);
+        BookingHistory history = new BookingHistory();
+        BookingService bookingService = new BookingService(inventory, history);
         bookingService.processRequests(bookingQueue.getQueue()); // FIFO processing
 
         // Show allocated rooms

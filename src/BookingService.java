@@ -12,8 +12,13 @@ public class BookingService {
     private RoomInventory inventory;
     private HashMap<String, Set<String>> allocatedRooms;
 
-    public BookingService(RoomInventory inventory) {
+    // ✅ UC8: Booking History added
+    private BookingHistory history;
+
+    // ✅ UPDATED CONSTRUCTOR
+    public BookingService(RoomInventory inventory, BookingHistory history) {
         this.inventory = inventory;
+        this.history = history;
         this.allocatedRooms = new HashMap<>();
     }
 
@@ -21,31 +26,55 @@ public class BookingService {
      * Processes queued booking requests (FIFO)
      */
     public void processRequests(Queue<Reservation> requestQueue) {
+
         while (!requestQueue.isEmpty()) {
 
-            Reservation request = requestQueue.poll(); // FIFO
-            String roomType = request.getRoomType();
-            int available = inventory.getAvailability(roomType);
+            Reservation request = requestQueue.poll();
 
-            if (available > 0) {
-                // Generate unique room ID
-                String roomID = generateRoomID(roomType);
+            try {
+                // ✅ UC9 VALIDATION
+                BookingValidator.validate(request, inventory);
 
-                // Allocate room
-                allocatedRooms.computeIfAbsent(roomType, k -> new HashSet<>()).add(roomID);
+                String roomType = request.getRoomType();
+                int available = inventory.getAvailability(roomType);
 
-                // Update inventory
-                inventory.updateAvailability(roomType, available - 1);
+                if (available > 0) {
 
-                System.out.println("Reservation Confirmed: " + request.getGuestName()
-                        + " -> " + roomType + " [" + roomID + "]");
-            } else {
-                System.out.println("Reservation Failed: " + request.getGuestName()
-                        + " -> " + roomType + " (No rooms available)");
+                    String roomID = generateRoomID(roomType);
+
+                    allocatedRooms
+                            .computeIfAbsent(roomType, k -> new HashSet<>())
+                            .add(roomID);
+
+                    inventory.updateAvailability(roomType, available - 1);
+
+                    System.out.println("Reservation Confirmed: "
+                            + request.getGuestName()
+                            + " -> " + roomType + " [" + roomID + "]");
+
+                    // UC8 history
+                    history.addBooking(request);
+
+                } else {
+                    System.out.println("Reservation Failed: "
+                            + request.getGuestName()
+                            + " -> " + roomType + " (No rooms available)");
+                }
+
+            } catch (InvalidBookingException e) {
+
+                // ✅ GRACEFUL FAILURE
+                System.out.println("Invalid Booking: "
+                        + e.getMessage());
+
+            } catch (Exception e) {
+
+                // Safety fallback
+                System.out.println("Unexpected error occurred: "
+                        + e.getMessage());
             }
         }
     }
-
     /**
      * Generates a unique room ID using room type and counter
      */
