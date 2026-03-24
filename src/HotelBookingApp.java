@@ -73,5 +73,20 @@ public class HotelBookingApp{
 
         System.out.println("Total Add-On Cost for Bob: $" +
                 serviceManager.calculateTotalCost("Bob"));
+
+        // ================= UC10: Cancellation =================
+
+        CancellationService cancellationService =
+                new CancellationService(inventory, bookingService, history);
+
+// Cancel booking
+        cancellationService.cancelBooking("Alice", "Single");
+
+// Try invalid cancellation
+        cancellationService.cancelBooking("Unknown", "Double");
+
+// Show updated inventory
+        System.out.println("\nInventory After Cancellation:");
+        inventory.displayInventory();
     }
 }
